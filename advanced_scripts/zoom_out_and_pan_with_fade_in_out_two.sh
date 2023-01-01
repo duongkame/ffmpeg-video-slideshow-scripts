@@ -15,13 +15,18 @@ TRANSITION_DURATION=3
 IMAGE_DURATION=1
 SCREEN_MODE=2               # 1=CENTER, 2=CROP, 3=SCALE, 4=BLUR
 BACKGROUND_COLOR="black"
+INPUT_MEDIA_FOLDER="./media/"
+OUTPUT="./output.mp4"
 
 IFS=$'\t\n'                 # REQUIRED TO SUPPORT SPACES IN FILE NAMES
+
+CUR_DIR="$(dirname "$0")"
+source "${CUR_DIR}/../options/options_parser.sh"
 
 # FILE OPTIONS
 # FILES=`find ../media/*.jpg | sort -r`             # USE ALL IMAGES UNDER THE media FOLDER SORTED
 # FILES=('../media/1.jpg' '../media/2.jpg')         # USE ONLY THESE IMAGE FILES
-FILES=`find ../media/*.jpg`                         # USE ALL IMAGES UNDER THE media FOLDER
+FILES=`find $INPUT_MEDIA_FOLDER/*`                  # USE ALL IMAGES UNDER THE media FOLDER
 
 ############################
 # DO NO MODIFY LINES BELOW
@@ -38,9 +43,8 @@ fi
 
 # INTERNAL VARIABLES
 TRANSITION_FRAME_COUNT=$(( TRANSITION_DURATION*FPS ))
-IMAGE_FRAME_COUNT=$(( IMAGE_DURATION*FPS ))
-TOTAL_DURATION=$(( (IMAGE_DURATION+2*TRANSITION_DURATION)*IMAGE_COUNT ))
-TOTAL_FRAME_COUNT=$(( TOTAL_DURATION*FPS ))
+IMAGE_DURATION=$( echo "1.0*$TOTAL_DURATION/$IMAGE_COUNT-2*$TRANSITION_DURATION" | bc -l )
+IMAGE_FRAME_COUNT=$(echo "$IMAGE_DURATION*$FPS" | bc )
 
 echo -e "\nVideo Slideshow Info\n------------------------\nImage count: ${IMAGE_COUNT}\nDimension: ${WIDTH}x${HEIGHT}\nFPS: ${FPS}\nImage duration: ${IMAGE_DURATION} s\n\
 Transition duration: ${TRANSITION_DURATION} s\nTotal duration: ${TOTAL_DURATION} s\n"
@@ -119,7 +123,7 @@ done
 FULL_SCRIPT+="concat=n=${IMAGE_COUNT}:v=1:a=0,format=yuv420p[video]\""
 
 # 7. END
-FULL_SCRIPT+=" -map [video] -vsync 2 -async 1 -rc-lookahead 0 -g 0 -profile:v main -level 42 -c:v libx264 -r ${FPS} ../advanced_zoom_out_and_pan_with_fade_in_out_two.mp4"
+FULL_SCRIPT+=" -map [video] -vsync 2 -async 1 -rc-lookahead 0 -g 0 -profile:v main -level 42 -c:v libx264 -r ${FPS} $OUTPUT"
 
 eval ${FULL_SCRIPT}
 

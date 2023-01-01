@@ -12,7 +12,7 @@ WIDTH=1280
 HEIGHT=720
 FPS=30
 TRANSITION_DURATION=1
-IMAGE_DURATION=2
+TOTAL_DURATION=10
 SCREEN_MODE=1               # 1=CENTER, 2=CROP, 3=SCALE, 4=BLUR
 ZOOM_SPEED=2                # 1=SLOWEST, 2=SLOW, 3=MODERATE, 4=FASTER, 5=FASTEST, ...
 BACKGROUND_COLOR="black"
@@ -21,51 +21,8 @@ OUTPUT="./advanced_zoom_in_and_pan_with_fade_in_out_one.mp4"
 
 IFS=$'\t\n'                 # REQUIRED TO SUPPORT SPACES IN FILE NAMES
 
-usage() {                                 # Function: Print a help message.
-  echo "Usage: $0 [ -w width ] [ -height ] [ -t transition period ]
-  [ -d image duration ] [ -i image input folder ] [ -o output file ]
-  [ -s screen mode (1=CENTER, 2=CROP, 3=SCALE, 4=BLUR) ]  " 1>&2
-}
-exit_abnormal() {                         # Function: Exit with error.
-  usage
-  exit 1
-}
-
-while getopts ":w:h:t:d:i:o:s:" options; do
-  case "${options}" in
-    w)
-      WIDTH=${OPTARG}
-      ;;
-    h)
-      HEIGHT=${OPTARG}
-      ;;
-    t)
-      TRANSITION_DURATION=${OPTARG}
-      ;;
-    d)
-      IMAGE_DURATION=${OPTARG}
-      echo "image duration $IMAGE_DURATION"
-      ;;
-    i)
-      INPUT_MEDIA_FOLDER=${OPTARG}
-      ;;
-    o)
-      OUTPUT=${OPTARG}
-      ;;
-    s)
-      SCREEN_MODE=${OPTARG}
-      ;;
-    :)                                    # If expected argument omitted:
-      echo "Error: -${OPTARG} requires an argument."
-      exit_abnormal
-      ;;
-    *)                                    # If unknown (any other) option:
-      exit_abnormal
-      ;;
-  esac
-done
-
-
+CUR_DIR="$(dirname "$0")"
+source "${CUR_DIR}/../options/options_parser.sh"
 
 # FILE OPTIONS
 # FILES=`find ../media/*.jpg | sort -r`             # USE ALL IMAGES UNDER THE media FOLDER SORTED
@@ -88,9 +45,8 @@ fi
 
 # INTERNAL VARIABLES
 TRANSITION_FRAME_COUNT=$(( TRANSITION_DURATION*FPS ))
+IMAGE_DURATION=$( echo "1.0*$TOTAL_DURATION/$IMAGE_COUNT-2*$TRANSITION_DURATION" | bc -l )
 IMAGE_FRAME_COUNT=$(echo "$IMAGE_DURATION*$FPS" | bc )
-TOTAL_DURATION=$( echo "($IMAGE_DURATION+2*$TRANSITION_DURATION)*$IMAGE_COUNT" | bc )
-TOTAL_FRAME_COUNT=$(( TOTAL_DURATION*FPS ))
 
 echo -e "\nVideo Slideshow Info\n------------------------\nImage count: ${IMAGE_COUNT}\nDimension: ${WIDTH}x${HEIGHT}\nFPS: ${FPS}\nImage duration: ${IMAGE_DURATION} s\n\
 Transition duration: ${TRANSITION_DURATION} s\nTotal duration: ${TOTAL_DURATION} s\n"

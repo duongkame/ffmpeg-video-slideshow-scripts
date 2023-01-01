@@ -16,13 +16,18 @@ BACKGROUND_COLOR="black"
 DIRECTION=2                 # 1=TOP TO BOTTOM, 2=BOTTOM TO TOP
 INCLUDE_INTRO=1             # START WITH EMPTY SCREEN
 INCLUDE_OUTRO=0             # END WITH EMPTY SCREEN
+INPUT_MEDIA_FOLDER="./media/"
+OUTPUT="./output.mp4"
+
+CUR_DIR="$(dirname "$0")"
+source "${CUR_DIR}/../options/options_parser.sh"
 
 IFS=$'\t\n'                 # REQUIRED TO SUPPORT SPACES IN FILE NAMES
 
 # FILE OPTIONS
 # FILES=`find ../media/*.jpg | sort -r`             # USE ALL IMAGES UNDER THE media FOLDER SORTED
 # FILES=('../media/1.jpg' '../media/2.jpg')         # USE ONLY THESE IMAGE FILES
-FILES=`find ../media/*.jpg`                         # USE ALL IMAGES UNDER THE media FOLDER
+FILES=`find $INPUT_MEDIA_FOLDER/*`                  # USE ALL IMAGES UNDER THE media FOLDER
 
 ############################
 # DO NO MODIFY LINES BELOW
@@ -94,7 +99,7 @@ case ${DIRECTION} in
 esac
 
 # 9. END
-FULL_SCRIPT+=" -map [video] -vsync 2 -async 1 -rc-lookahead 0 -g 0 -profile:v main -level 42 -c:v libx264 -r ${FPS} ../transition_stack_vertical.mp4"
+FULL_SCRIPT+=" -map [video] -vsync 2 -async 1 -rc-lookahead 0 -g 0 -profile:v main -level 42 -c:v libx264 -r ${FPS} $OUTPUT"
 
 eval ${FULL_SCRIPT}
 
